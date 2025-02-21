@@ -58,29 +58,30 @@ public class Main {
                 case 7:
                     System.out.print("Enter the name of the file you would like to open: ");
                     FileInputStream toBeRead = null;
-                    String readName = scnr.next();
+                    String readName = scnr.nextLine();
                     toBeRead = findReadableFile(toBeRead, readName, scnr);
                     readFile(toBeRead);
                     break;
                 case 8:
                     System.out.print("Enter the name of the file you would like to write to: ");
-                    FileOutputStream toBeWrittenTo = null;
-                    String writtenName = scnr.next();
-                    toBeWrittenTo = findWritableFile(toBeWrittenTo, writtenName, scnr);
+                    String writtenName = scnr.nextLine();
+                    FileOutputStream toBeWrittenTo = findWritableFile(writtenName, scnr);
                     PrintWriter fileWriter = new PrintWriter(toBeWrittenTo);
+
+                    System.out.print("Add the text you would like to write to your file: ");
                     String text = scnr.nextLine();
-                    char more;
+                    fileWriter.println(text);
+                    System.out.print("Write more? (Y/N)");
+                    String moreString;
+                    char moreChar;
                     do {
-                        System.out.print("Add the text you would like to write to your file: ");
-                        text = scnr.nextLine();
-                        fileWriter.print(text);
-                        fileWriter.flush();
-                        fileWriter.close();
-                        do {
-                            System.out.print("Write more? (Y/N");
-                            more = scnr.next().charAt(0);
-                        } while (more != 'N' && more != 'n' && more != 'Y' && more != 'y');
-                    } while (more == 'Y' || more == 'y');
+                        moreString = scnr.nextLine();
+                        moreChar = moreString.charAt(0);
+                    } while ((moreString.length() != 1) || ((moreChar != 'Y') && (moreChar != 'y') && (moreChar != 'N') && (moreChar != 'n')));
+                    writeFile(fileWriter, text, moreChar, scnr);
+
+                    fileWriter.flush();
+                    fileWriter.close();
                     break;
             }
 
@@ -109,7 +110,8 @@ public class Main {
             toBeRead = new FileInputStream(readName);
             return toBeRead;
         } catch (FileNotFoundException e) {
-            readName = scnr.next();
+            System.out.print("File does not exist. Try again or press 0 to quit: ");
+            readName = scnr.nextLine();
             return findReadableFile(toBeRead, readName, scnr);
         }
     }
@@ -123,13 +125,27 @@ public class Main {
         fileReader.close();
     }
 
-    public static FileOutputStream findWritableFile(FileOutputStream toBeWrittenTo, String writtenName, Scanner scnr) {
+    public static FileOutputStream findWritableFile(String writtenName, Scanner scnr) {
         try {
-            toBeWrittenTo = new FileOutputStream(writtenName, true);
+            FileOutputStream toBeWrittenTo = new FileOutputStream(writtenName);
             return toBeWrittenTo;
         } catch (FileNotFoundException e) {
-            writtenName = scnr.next();
-            return findWritableFile(toBeWrittenTo, writtenName, scnr);
+            System.out.print("File does not exist. Try again or press 0 to quit: ");
+            writtenName = scnr.nextLine();
+            return findWritableFile(writtenName, scnr);
+        }
+    }
+
+    public static void writeFile(PrintWriter fileWriter, String text, char moreChar, Scanner scnr) {
+        if (moreChar == 'Y' || moreChar == 'y') {
+            fileWriter.println(text);
+            System.out.print("Write more? (Y/N)");
+            String moreString;
+            do {
+                moreString = scnr.nextLine();
+                moreChar = moreString.charAt(0);
+            } while ((moreString.length() != 1) || ((moreChar != 'Y') && (moreChar != 'y') && (moreChar != 'N') && (moreChar != 'n')));
+            writeFile(fileWriter, text, moreChar, scnr);
         }
     }
 }
