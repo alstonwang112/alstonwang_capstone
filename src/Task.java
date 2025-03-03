@@ -38,7 +38,7 @@ public class Task{
     }
 
     public String getTaskDescription() {
-        return this.taskDescription; // Returns the task.
+        return this.taskDescription; // Returns the task description.
     }
 
     public LocalDateTime getTaskCreated() {
@@ -47,10 +47,5 @@ public class Task{
 
     public LocalDateTime getTaskDeadline() {
         return this.taskDeadline; // Returns when the task is due.
-    }
-
-    @Override
-    public String toString() {
-        return "(" + taskName + ", " + taskDescription + ", " + taskCreated + ", " + taskDeadline + ")";
     }
 }

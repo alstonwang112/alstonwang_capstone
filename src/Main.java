@@ -11,15 +11,15 @@ public class Main {
         char continueOrNot; // Used to check if the user wants to continue.
         ArrayList<Task> taskCollection = new ArrayList<>();
         int taskNum; // Used to retrieve the task we want when editing or opening.
-        int listNum; // USed to retrieve the list we want when editing or opening.
+        int listNum; // Used to retrieve the list we want when editing or opening.
         
         do {
             System.out.println("What would you like to do?");
             printOptions();
-            System.out.print("Enter a number (1 - 8): ");
+            System.out.print("Enter a number (1 - 9): ");
 
             Scanner scnr = new Scanner(System.in);
-            int option = checkNumberValidity(1, 8, scnr);
+            int option = checkNumberValidity(1, 10, scnr);
 
             switch (option) {
                 case 1: {
@@ -56,7 +56,15 @@ public class Main {
                 }
                 case 4: {
                     System.out.print("(4) Enter the name of the list you would like to create: ");
-                    String createList = scnr.nextLine();
+                    String listName = scnr.nextLine();
+
+                    System.out.print("    Enter a brief description of your list: ");
+                    String listDescription = scnr.nextLine();
+
+                    ArrayList<Task> listOfTasks = new ArrayList<>();
+
+
+
                     break;
                 }
                 case 5: {
@@ -111,6 +119,10 @@ public class Main {
                     writeFile(fileWriter, writeMe, scnr);
                     break;
                 }
+                case 9: {
+                    System.out.println("(9): Enter the item you wish to sort: ");
+                    break;
+                }
             }
 
             System.out.println("Continue with another task? (Y/N): ");
@@ -130,6 +142,7 @@ public class Main {
         System.out.println("    (6) Open list.");
         System.out.println("    (7) Open text file.");
         System.out.println("    (8) Write to text file.");
+        System.out.println("    (9) Sort.");
     } // Prints a list of possible actions.
 
     public static int checkNumberValidity(int lowerBound, int upperBound, Scanner scnr) {
@@ -231,6 +244,10 @@ public class Main {
         System.out.println("Task Deadline: " + T.getTaskDeadline());
     } // Prints out details of a task.
 
+    public static ArrayList<Task> addTaskToList() {
+
+    }
+
     public static void readFile(FileInputStream readMe) {
         Scanner fileReader = new Scanner(readMe);
 
@@ -255,6 +272,84 @@ public class Main {
             fileWriter.close();
         }
     } // Used to write to a file.
+
+    /*
+
+    public static int sort(Scanner scnr) {
+        System.out.println("    What would you like to sort?");
+        System.out.println("        (1) Sort all tasks.");
+        System.out.println("        (2) Sort one list.");
+        System.out.println("        (3) Sort all lists.");
+        System.out.print("    Enter a number (1 - 3): ");
+
+        return checkNumberValidity(1, 3, scnr);
+    } // Tells the program what the user wants to sort.
+
+    public static ArrayList<Task> sortAllTasks(int sortBy) {
+        switch (sortBy) {
+            case 1: {
+
+                break;
+            }
+            case 2: {
+                break;
+            }
+            case 3: {
+                break;
+            }
+        }
+    }
+
+    public static List sortList(int sortBy, List L1) {
+        switch (sortBy) {
+            case 1: {
+
+                break;
+            }
+            case 2: {
+                break;
+            }
+            case 3: {
+                break;
+            }
+        }
+    }
+
+    public static ArrayList<List> sortAllLists(int sortBy) {
+        switch (sortBy) {
+            case 1: {
+
+                break;
+            }
+            case 2: {
+                break;
+            }
+            case 3: {
+                break;
+            }
+        }
+    }
+
+    public static int sortBy(Scanner scnr) {
+        System.out.println("    What would you like to sort by?");
+        System.out.println("        (1) Sort by name.");
+        System.out.println("        (2) Sort by description.");
+        System.out.println("        (3) Sort by creation date.");
+        System.out.println("        (4) Sort by due date.");
+        System.out.print("    Enter a number (1 - 4): ");
+
+        return checkNumberValidity(1, 4, scnr);
+    } // Tells the program what the user wants to sort by.
+
+    public static int order(Scanner scnr) {
+        System.out.println("    In what order?");
+        System.out.println("        (1) Ascending.");
+        System.out.println("        (2) Descending.");
+        System.out.print("    Enter a number (1 - 2): ");
+
+        return checkNumberValidity(1, 2, scnr);
+    } // Tells the program what order the user wants to sort by.
+     */
 
     public static char continueOrNot(Scanner scnr) {
         String continueOrNot = scnr.nextLine();
