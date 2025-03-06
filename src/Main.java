@@ -2,6 +2,7 @@ import java.io.*;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -10,6 +11,7 @@ public class Main {
         System.out.println("Welcome to Alston Wang's task management application.");
         char continueOrNot; // Used to check if the user wants to continue.
         ArrayList<Task> taskCollection = new ArrayList<>();
+        ArrayList<List> listCollection = new ArrayList<>();
         int taskNum; // Used to retrieve the task we want when editing or opening.
         int listNum; // Used to retrieve the list we want when editing or opening.
         
@@ -63,7 +65,12 @@ public class Main {
 
                     ArrayList<Task> listOfTasks = new ArrayList<>();
 
-
+                    System.out.print("    Enter the name of the task you would like to add to this list: ");
+                    String taskName = scnr.nextLine();
+                    // Check if this task exists.
+                    // If not, create a new task.
+                    // Add task to the ArrayList.
+                    // Use the ArrayList to create a List object.
 
                     break;
                 }
@@ -120,7 +127,22 @@ public class Main {
                     break;
                 }
                 case 9: {
-                    System.out.println("(9): Enter the item you wish to sort: ");
+                    System.out.println("(9): ");
+                    int sortItem = sortOptions(scnr);
+                    int sortBy = sortBy(scnr);
+                    int sortOrder = sortOrder(scnr);
+                    switch (sortItem) {
+                        case 1: {
+                            CompareTasks comparator = new CompareTasks();
+                            taskCollection = comparator.Sort(taskCollection, sortBy, sortOrder);
+                        }
+                        case 2: {
+
+                        }
+                        case 3: {
+
+                        }
+                    }
                     break;
                 }
             }
@@ -244,9 +266,11 @@ public class Main {
         System.out.println("Task Deadline: " + T.getTaskDeadline());
     } // Prints out details of a task.
 
+    /*
     public static ArrayList<Task> addTaskToList() {
 
     }
+    */
 
     public static void readFile(FileInputStream readMe) {
         Scanner fileReader = new Scanner(readMe);
@@ -273,10 +297,8 @@ public class Main {
         }
     } // Used to write to a file.
 
-    /*
-
-    public static int sort(Scanner scnr) {
-        System.out.println("    What would you like to sort?");
+    public static int sortOptions(Scanner scnr) {
+        System.out.println("What would you like to sort?");
         System.out.println("        (1) Sort all tasks.");
         System.out.println("        (2) Sort one list.");
         System.out.println("        (3) Sort all lists.");
@@ -285,50 +307,55 @@ public class Main {
         return checkNumberValidity(1, 3, scnr);
     } // Tells the program what the user wants to sort.
 
-    public static ArrayList<Task> sortAllTasks(int sortBy) {
+    /*
+    public static List sortList(int sortBy, int sortOrder, List L1) {
         switch (sortBy) {
             case 1: {
+                if (sortOrder == 1) {
+                } else {
+                }
 
                 break;
             }
             case 2: {
+                if (sortOrder == 1) {
+                } else {
+                }
                 break;
             }
             case 3: {
+                if (sortOrder == 1) {
+                } else {
+                }
                 break;
             }
         }
     }
 
-    public static List sortList(int sortBy, List L1) {
+    public static ArrayList<List> sortAllLists(int sortBy, int sortOrder, ArrayList<List> listCollection) {
         switch (sortBy) {
             case 1: {
-
+                if (sortOrder == 1) {
+                } else {
+                }
                 break;
             }
             case 2: {
+                if (sortOrder == 1) {
+                } else {
+                }
                 break;
             }
             case 3: {
+                if (sortOrder == 1) {
+                } else {
+                }
                 break;
             }
         }
     }
 
-    public static ArrayList<List> sortAllLists(int sortBy) {
-        switch (sortBy) {
-            case 1: {
-
-                break;
-            }
-            case 2: {
-                break;
-            }
-            case 3: {
-                break;
-            }
-        }
-    }
+    */
 
     public static int sortBy(Scanner scnr) {
         System.out.println("    What would you like to sort by?");
@@ -341,7 +368,7 @@ public class Main {
         return checkNumberValidity(1, 4, scnr);
     } // Tells the program what the user wants to sort by.
 
-    public static int order(Scanner scnr) {
+    public static int sortOrder(Scanner scnr) {
         System.out.println("    In what order?");
         System.out.println("        (1) Ascending.");
         System.out.println("        (2) Descending.");
@@ -349,7 +376,6 @@ public class Main {
 
         return checkNumberValidity(1, 2, scnr);
     } // Tells the program what order the user wants to sort by.
-     */
 
     public static char continueOrNot(Scanner scnr) {
         String continueOrNot = scnr.nextLine();

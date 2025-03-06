@@ -1,6 +1,6 @@
 import java.time.LocalDateTime;
 
-public class Task{
+public class Task {
     private String taskName; // What the task will be called in the directory.
     private String taskDescription; // What the actual task is.
     private LocalDateTime taskCreated; // Time and date the task was created.
