@@ -2,7 +2,6 @@ import java.io.*;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -129,18 +128,39 @@ public class Main {
                 case 9: {
                     System.out.println("(9): ");
                     int sortItem = sortOptions(scnr);
-                    int sortBy = sortBy(scnr);
+                    int sortBy = sortBy(scnr, sortItem);
                     int sortOrder = sortOrder(scnr);
+
+                    CompareTasks taskComparator = new CompareTasks();
+                    CompareLists listComparator = new CompareLists();
+
                     switch (sortItem) {
                         case 1: {
-                            CompareTasks comparator = new CompareTasks();
-                            taskCollection = comparator.Sort(taskCollection, sortBy, sortOrder);
+                            taskCollection = taskComparator.Sort(taskCollection, sortBy, sortOrder);
+
+                            System.out.print("    All tasks sorted. ");
+                            break;
                         }
                         case 2: {
+                            System.out.print("    Enter the name of the list you would like to sort: ");
+                            String listToBeSorted = scnr.nextLine();
 
+                            listNum = searchList(listToBeSorted, listCollection, scnr);
+                            List temp = listCollection.get(listNum);
+
+                            ArrayList<Task> replacementListOfTasks = taskComparator.Sort(temp.getListOfTasks(), sortBy, sortOrder);
+                            List replacement = new List(temp.getListName(), temp.getListDescription(), temp.getListCreated(), replacementListOfTasks);
+
+                            listCollection.set(listNum, replacement);
+
+                            System.out.print("    List sorted. ");
+                            break;
                         }
                         case 3: {
+                            listCollection = listComparator.Sort(listCollection, sortBy, sortOrder);
 
+                            System.out.print("    All lists sorted. ");
+                            break;
                         }
                     }
                     break;
@@ -272,6 +292,21 @@ public class Main {
     }
     */
 
+    public static int searchList(String listName, ArrayList<List> listCollection, Scanner scnr) {
+        int size = listCollection.size();
+
+        for (int i = 0; i < size; i++) {
+            if (listName.equals(listCollection.get(i).getListName())) {
+                return i;
+            }
+        }
+
+        System.out.print("    Invalid. Try again: ");
+        listName = scnr.nextLine();
+
+        return searchList(listName, listCollection, scnr);
+    } // Used to search for the list the user desires.
+
     public static void readFile(FileInputStream readMe) {
         Scanner fileReader = new Scanner(readMe);
 
@@ -307,65 +342,20 @@ public class Main {
         return checkNumberValidity(1, 3, scnr);
     } // Tells the program what the user wants to sort.
 
-    /*
-    public static List sortList(int sortBy, int sortOrder, List L1) {
-        switch (sortBy) {
-            case 1: {
-                if (sortOrder == 1) {
-                } else {
-                }
-
-                break;
-            }
-            case 2: {
-                if (sortOrder == 1) {
-                } else {
-                }
-                break;
-            }
-            case 3: {
-                if (sortOrder == 1) {
-                } else {
-                }
-                break;
-            }
-        }
-    }
-
-    public static ArrayList<List> sortAllLists(int sortBy, int sortOrder, ArrayList<List> listCollection) {
-        switch (sortBy) {
-            case 1: {
-                if (sortOrder == 1) {
-                } else {
-                }
-                break;
-            }
-            case 2: {
-                if (sortOrder == 1) {
-                } else {
-                }
-                break;
-            }
-            case 3: {
-                if (sortOrder == 1) {
-                } else {
-                }
-                break;
-            }
-        }
-    }
-
-    */
-
-    public static int sortBy(Scanner scnr) {
+    public static int sortBy(Scanner scnr, int sortItem) {
         System.out.println("    What would you like to sort by?");
         System.out.println("        (1) Sort by name.");
         System.out.println("        (2) Sort by description.");
         System.out.println("        (3) Sort by creation date.");
-        System.out.println("        (4) Sort by due date.");
-        System.out.print("    Enter a number (1 - 4): ");
 
-        return checkNumberValidity(1, 4, scnr);
+        if (sortItem == 1) {
+            System.out.println("        (4) Sort by due date.");
+            System.out.print("    Enter a number (1 - 4): ");
+            return checkNumberValidity(1, 4, scnr);
+        } else {
+            System.out.print("    Enter a number (1 - 3): ");
+            return checkNumberValidity(1, 3, scnr);
+        }
     } // Tells the program what the user wants to sort by.
 
     public static int sortOrder(Scanner scnr) {

@@ -100,8 +100,8 @@ public class CompareTasks {
         return taskCollection;
     }
 
-    public void Swap(ArrayList<Task> taskCollection, Task T1, Task T2, int j) {
-        taskCollection.set(j, T2);
-        taskCollection.set(j + 1, T1);
+    public void Swap(ArrayList<Task> taskCollection, Task T1, Task T2, int i) {
+        taskCollection.set(i, T2);
+        taskCollection.set(i + 1, T1);
     }
 }
