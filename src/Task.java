@@ -5,12 +5,14 @@ public class Task {
     private String taskDescription; // What the actual task is.
     private LocalDateTime taskCreated; // Time and date the task was created.
     private LocalDateTime taskDeadline; // Time and date the task needs to be completed by.
+    private LinkedList commentThread; // Holds a thread of comments.
 
-    public Task(String taskName, String taskDescription, LocalDateTime taskCreated, LocalDateTime taskDeadline) {
+    public Task(String taskName, String taskDescription, LocalDateTime taskCreated, LocalDateTime taskDeadline, LinkedList commentThread) {
         this.taskName = taskName;
         this.taskDescription = taskDescription;
         this.taskCreated = taskCreated;
         this.taskDeadline = taskDeadline;
+        this.commentThread = commentThread;
     }
 
     Task(Task T) {
@@ -19,6 +21,7 @@ public class Task {
         taskDescription = T.taskDescription;
         taskCreated = T.taskCreated;
         taskDeadline = T.taskDeadline;
+        commentThread = T.commentThread;
     }
 
     public void setTaskName(String taskName) {
@@ -31,6 +34,10 @@ public class Task {
 
     public void setTaskDeadline(LocalDateTime taskDeadline) {
         this.taskDeadline = taskDeadline;
+    }
+
+    public void setHead(String comment) {
+        this.commentThread.head.comment = comment;
     }
 
     public String getTaskName() {
@@ -47,5 +54,9 @@ public class Task {
 
     public LocalDateTime getTaskDeadline() {
         return this.taskDeadline; // Returns when the task is due.
+    }
+
+    public LinkedList getCommentThread() {
+        return this.commentThread; // Returns the comment thread.
     }
 }

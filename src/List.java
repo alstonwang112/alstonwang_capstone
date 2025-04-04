@@ -30,8 +30,8 @@ public class List {
         this.listDescription = listDescription;
     }
 
-    public void addTasksToList(Task T) {
-        this.listOfTasks.add(T);
+    public void setListOfTasks(ArrayList<Task> L) {
+        this.listOfTasks = L;
     }
 
     public String getListName() {
