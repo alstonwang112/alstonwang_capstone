@@ -8,16 +8,32 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         System.out.println("Welcome to Alston Wang's task management application.");
+        System.out.println("Press *** to terminate the program at any time.");
         char continueOrNot; // Used to check if the user wants to continue.
         ArrayList<Task> taskCollection = new ArrayList<>();
         ArrayList<List> listCollection = new ArrayList<>();
         int taskNum;
         int listNum;
-        
+
+        FileInputStream myFile;
+        FileOutputStream createFile;
+        PrintWriter fileWriter = null;
+
+        try {
+            myFile = new FileInputStream("capstone.txt");
+            readFile(myFile, taskCollection, listCollection); // If "capstone.txt" exists, it will read it.
+        } catch (FileNotFoundException e1) {
+            try {
+                createFile = new FileOutputStream("capstone.txt");
+                fileWriter = new PrintWriter(createFile);
+            } // If "capstone.txt" doesn't exist, it will create it.
+            catch (FileNotFoundException e2) { System.out.println("Error."); } // Thus, this exception will never be reached.
+        }
+
         do {
             System.out.println("What would you like to do?");
             printOptions();
-            System.out.print("Enter a number (1 - 10): ");
+            System.out.print("Enter a number (1 - 8): ");
 
             Scanner scnr = new Scanner(System.in);
             int option = 0;
@@ -25,7 +41,7 @@ public class Main {
             do {
                 try {
                     option = scnr.nextInt();
-                    if (option < 1 || option > 10) {
+                    if (option < 1 || option > 8) {
                         System.out.print("Invalid. Try again: ");
                         scnr.nextLine();
                     }
@@ -33,7 +49,7 @@ public class Main {
                     System.out.print("Invalid. Try again: ");
                     scnr.nextLine();
                 }
-            } while (option < 1 || option > 10); // Will continue until valid input is given.
+            } while (option < 1 || option > 8); // Will continue until valid input is given.
 
             scnr.nextLine();
 
@@ -67,13 +83,13 @@ public class Main {
                         } while (taskDeadline == null);
 
                         LinkedList commentThread = new LinkedList(new Node("", null));
-                        taskCollection.add(createTask(taskName, taskDescription, taskDeadline, commentThread));
+                        taskCollection.add(Task.createTask(taskName, taskDescription, taskDeadline, commentThread));
                         System.out.print("    Task created. ");
                     } else {
                         System.out.print("    Enter the name of task you would like to duplicate: ");
                         String taskName = scnr.nextLine();
 
-                        taskNum = searchTask(taskName, taskCollection);
+                        taskNum = Task.searchTask(taskName, taskCollection);
 
                         if (taskNum == -1)
                         { System.out.print("    Task does not exist. "); }
@@ -92,12 +108,12 @@ public class Main {
                     System.out.print("(2) Enter the name of the task you would like to edit: ");
                     String taskName = scnr.nextLine();
 
-                    taskNum = searchTask(taskName, taskCollection);
+                    taskNum = Task.searchTask(taskName, taskCollection);
 
                     if (taskNum == -1)
                     { System.out.print("    Task does not exist. "); }
                     else {
-                        taskCollection.set(taskNum, editTask(taskCollection.get(taskNum)));
+                        taskCollection.set(taskNum, Task.editTask(taskCollection.get(taskNum)));
                         System.out.print("    Task edited. ");
                     }
 
@@ -107,12 +123,12 @@ public class Main {
                     System.out.print("(3) Enter the name of the task you would like to open: ");
                     String taskName = scnr.nextLine();
 
-                    taskNum = searchTask(taskName, taskCollection);
+                    taskNum = Task.searchTask(taskName, taskCollection);
 
                     if (taskNum == -1)
                     { System.out.print("    Task does not exist. "); }
                     else {
-                        openTask(taskCollection.get(taskNum));
+                        Task.openTask(taskCollection.get(taskNum));
                         System.out.print("    Task opened. ");
                     }
                     break;
@@ -139,7 +155,7 @@ public class Main {
                         System.out.print("    Enter the name of the task you would like to add to this list: ");
                         String taskName = scnr.nextLine();
 
-                        taskNum = searchTask(taskName, taskCollection);
+                        taskNum = Task.searchTask(taskName, taskCollection);
                         Task T;
 
                         if (taskNum != -1)
@@ -160,18 +176,18 @@ public class Main {
                             } while (taskDeadline == null);
 
                             LinkedList commentThread = new LinkedList(new Node("", null));
-                            T = createTask(taskName, taskDescription, taskDeadline, commentThread);
+                            T = Task.createTask(taskName, taskDescription, taskDeadline, commentThread);
                             taskCollection.add(T);
                         }
 
                         list.add(T);
-                        listCollection.add(createList(listName, listDescription, list));
+                        listCollection.add(List.createList(listName, listDescription, list));
                         System.out.print("    List created. ");
                     } else {
                         System.out.print("    Enter the name of list you would like to duplicate: ");
                         String listName = scnr.nextLine();
 
-                        listNum = searchList(listName, listCollection);
+                        listNum = List.searchList(listName, listCollection);
 
                         if (listNum == -1)
                         { System.out.print("    List does not exist. "); }
@@ -189,12 +205,12 @@ public class Main {
                     System.out.print("(5) Enter the name of the list you would like to edit: ");
                     String listName = scnr.nextLine();
 
-                    listNum = searchList(listName, listCollection);
+                    listNum = List.searchList(listName, listCollection);
 
                     if (listNum == -1)
                     { System.out.print("    List does not exist. "); }
                     else {
-                        listCollection.set(listNum, editList(listCollection.get(listNum)));
+                        listCollection.set(listNum, List.editList(listCollection.get(listNum)));
                         System.out.print("    List edited. ");
                     }
 
@@ -204,64 +220,18 @@ public class Main {
                     System.out.print("(6) Enter the name of the list you would like to open: ");
                     String listName = scnr.nextLine();
 
-                    listNum = searchList(listName, listCollection);
+                    listNum = List.searchList(listName, listCollection);
 
                     if (listNum == -1)
                     { System.out.print("    List does not exist. "); }
                     else {
-                        openList(listCollection.get(listNum));
+                        List.openList(listCollection.get(listNum));
                         System.out.print("    List opened. ");
                     }
                     break;
                 }
                 case 7: {
-                    System.out.print("(7) Enter the name of the file you would like to open: ");
-
-                    boolean readError; // Used to know when to break out of the do-while loop.
-                    FileInputStream readMe = null;
-
-                    do {
-                        scnr.nextLine();
-                        String nameOfFile = scnr.nextLine();
-                        try {
-                            readMe = new FileInputStream(nameOfFile);
-                            readError = false;
-                        } catch (FileNotFoundException e) {
-                            System.out.print("    File does not exist. Try again: ");
-                            readError = true;
-                        }
-                    } while (readError);
-
-                    readFile(readMe);
-                    System.out.print("    File read. ");
-                    break;
-                }
-                case 8: {
-                    System.out.print("(8) Enter the name of the file you would like to write to: ");
-
-                    boolean writeError; // Used to know when to break out of the do-while loop.
-                    FileOutputStream writeMe = null;
-
-                    do {
-                        scnr.nextLine();
-                        String nameOfFile = scnr.nextLine();
-                        try {
-                            writeMe = new FileOutputStream(nameOfFile);
-                            writeError = false;
-                        } catch (FileNotFoundException e) {
-                            System.out.print("    File does not exist. Try again: ");
-                            writeError = true;
-                        }
-                    } while (writeError);
-
-                    PrintWriter fileWriter = new PrintWriter(writeMe, true);
-                    writeFile(fileWriter, writeMe, scnr);
-
-                    System.out.print("    File written to. ");
-                    break;
-                }
-                case 9: {
-                    System.out.println("(9): ");
+                    System.out.println("(7): ");
                     int sortItem = sortOptions();
                     int sortBy = sortBy(sortItem);
                     int sortOrder = sortOrder();
@@ -279,7 +249,7 @@ public class Main {
                             System.out.print("    Enter the name of the list you would like to sort: ");
                             String listName = scnr.nextLine();
 
-                            listNum = searchList(listName, listCollection);
+                            listNum = List.searchList(listName, listCollection);
 
                             if (listNum == -1)
                             { System.out.print("    List does not exist. "); }
@@ -298,21 +268,81 @@ public class Main {
                     }
                     break;
                 }
-                case 10: {
-                    System.out.print("(10) Would you like to add (A) a comment or read (R) the comment thread? ");
-                    String response;
-                    char choice;
+                case 8: {
+                    System.out.print("(8): ");
+                    int comments = commentOptions();
+                    boolean exists = false;
+                    String taskName;
+                    Task T = null;
 
                     do {
-                        response = scnr.nextLine();
-                        choice = response.charAt(0);
-                    } while((choice != 'A' && choice != 'a' && choice != 'R' && choice != 'r') || response.length() != 1);
+                        System.out.print("    Enter the name of the task you want to open the comments thread of: ");
+                        taskName = scnr.nextLine();
+                        taskNum = Task.searchTask(taskName, taskCollection);
+                        if (taskNum == -1) {
+                            System.out.print("    Task does not exist. ");
+                        } else {
+                            T = taskCollection.get(taskNum);
+                            exists = true;
+                        }
+                    } while(!exists);
+
+                    String comment;
+
+                    switch (comments) {
+                        case 1: {
+                            System.out.print("    Write your comment: ");
+                            comment = scnr.nextLine();
+                            if (T.getCommentThread().isEmpty()) {
+                                T.getCommentThread().head = new Node(comment, null);
+                            } else {
+                                Queue.add(comment);
+                            }
+                            break;
+                        }
+                        case 2: {
+                            System.out.print("    Write the comment you'd like to edit: ");
+                            comment = scnr.nextLine();
+
+                            Node curr = T.getCommentThread().head;
+                            while (curr != null) {
+                                if (curr.comment.equals(comment)) {
+                                    break;
+                                } else {
+                                    curr = curr.next;
+                                }
+                            }
+
+                            if (curr == null) {
+                                System.out.println("    This comment doesn't exist. Add a new comment instead: ");
+                                comment = scnr.nextLine();
+                                if (T.getCommentThread().isEmpty()) {
+                                    T.getCommentThread().head = new Node(comment, null);
+                                } else {
+                                    Queue.add(comment);
+                                }
+                                break;
+                            } else {
+                                System.out.print("    Write the comment you'd like to replace it with: ");
+                                curr.comment = scnr.nextLine();
+                                break;
+                            }
+                        }
+                        case 3: {
+                            String deleted = Queue.remove();
+                            break;
+                        }
+                        case 4: {
+
+                            break;
+                        }
+                    }
 
                     if (Character.toLowerCase(choice) == 'a') {
                         System.out.print("    Enter the name of the task you would like to add a comment to: ");
                         String taskName = scnr.nextLine();
 
-                        taskNum = searchTask(taskName, taskCollection);
+                        taskNum = Task.searchTask(taskName, taskCollection);
 
                         if (taskNum != -1)
                         { System.out.print("    Task does not exist. "); }
@@ -348,7 +378,7 @@ public class Main {
                         System.out.print("    Enter the name of the task you would like to read the comments of: ");
                         String taskName = scnr.nextLine();
 
-                        taskNum = searchTask(taskName, taskCollection);
+                        taskNum = Task.searchTask(taskName, taskCollection);
 
                         if (taskNum != -1)
                         { System.out.print("    Task does not exist. "); }
@@ -378,6 +408,8 @@ public class Main {
             continueOrNot = continueOrNot(scnr);
         } while (continueOrNot == 'Y' || continueOrNot == 'y');
 
+        writeFile(fileWriter, taskCollection, listCollection);
+
         System.out.println("Application closed.");
         System.exit(1);
     }
@@ -389,236 +421,144 @@ public class Main {
         System.out.println("    (4) Create/duplicate list.");
         System.out.println("    (5) Edit list.");
         System.out.println("    (6) Open list.");
-        System.out.println("    (7) Open text file.");
-        System.out.println("    (8) Write to text file.");
-        System.out.println("    (9) Sort.");
-        System.out.println("    (10) Add/read comment(s).");
-    } // Prints a list of possible actions.
+        System.out.println("    (7) Sort.");
+        System.out.println("    (8) Add/read comment(s).");
+    }
 
     public static LocalDateTime checkLocalDateValidity(String str) {
         String[] date = str.split(",");
-
-        int year = Integer.parseInt(date[0]);
-        int month = Integer.parseInt(date[1]);
-        int day = Integer.parseInt(date[2]);
-        int hour = Integer.parseInt(date[3]);
-        int minute = Integer.parseInt(date[4]);
-        // FIXME: What happens when a string doesn't have 5 numbers?
-
-        try
-        { return LocalDateTime.of(year, month, day, hour, minute); }
-        catch (DateTimeException e) {
+        if (date.length != 5) {
             System.out.print("    Invalid. Try again: ");
             return null;
-        }
-    } // Checks to see if the date and time provided is valid.
-
-    public static Task createTask(String taskName, String taskDescription, LocalDateTime taskDeadline, LinkedList L) {
-        LocalDateTime taskCreated = LocalDateTime.now();
-        return new Task(taskName, taskDescription, taskCreated, taskDeadline, L);
-    } // Creates a new task using an explicit constructor.
-
-    public static int searchTask(String taskName, ArrayList<Task> taskCollection) {
-        int size = taskCollection.size();
-
-        for (int i = 0; i < size; i++) {
-            if (taskName.equals(taskCollection.get(i).getTaskName()))
-            { return i; }
-        }
-
-        return -1;
-    } // Used to search for the task the user desires.
-
-    public static Task editTask(Task T) {
-        System.out.println("    What would you like to edit?");
-        System.out.println("        (1) Edit task name.");
-        System.out.println("        (2) Edit task description.");
-        System.out.println("        (3) Edit task deadline.");
-        System.out.print("    Enter a number (1 - 3): ");
-
-        Scanner scnr = new Scanner(System.in);
-        int action = 0;
-
-        do {
-            try {
-                action = scnr.nextInt();
-                if (action < 1 || action > 3) {
-                    System.out.print("Invalid. Try again: ");
-                    scnr.nextLine();
-                }
-            } catch (InputMismatchException e) {
-                System.out.print("Invalid. Try again: ");
-                scnr.nextLine();
-            }
-        } while (action < 1 || action > 3);
-
-        scnr.nextLine();
-
-        switch (action) {
-            case 1: {
-                System.out.print("    Enter the new task name: ");
-                String taskName = scnr.nextLine();
-                T.setTaskName(taskName);
-                break;
-            }
-            case 2: {
-                System.out.print("    Enter the new task description: ");
-                String taskDescription = scnr.nextLine();
-                T.setTaskDescription(taskDescription);
-                break;
-            }
-            case 3: {
-                System.out.print("    Enter the new task deadline (year, month, day, hour, minute): ");
-                String str = scnr.nextLine();
-                LocalDateTime taskDeadline;
-
-                do {
-                    taskDeadline = checkLocalDateValidity(str);
-                    if (taskDeadline == null)
-                    { str = scnr.nextLine(); }
-                } while (taskDeadline == null);
-
-                T.setTaskDeadline(taskDeadline);
-                break;
+        } else {
+            int year = Integer.parseInt(date[0]);
+            int month = Integer.parseInt(date[1]);
+            int day = Integer.parseInt(date[2]);
+            int hour = Integer.parseInt(date[3]);
+            int minute = Integer.parseInt(date[4]);
+            try { return LocalDateTime.of(year, month, day, hour, minute); } catch (DateTimeException e) {
+                System.out.print("    Invalid. Try again: ");
+                return null;
             }
         }
+    }
 
-        System.out.print("    Task edited. Continue editing? (Y/N): ");
-        if (continueOrNot(scnr) == 'Y' || continueOrNot(scnr) == 'y')
-        { return editTask(T); } // Recursive call if the user wants to keep editing.
-        else
-        { return T; }
-    } // Used to make edits to a task.
+    public static void readFile(FileInputStream myFile, ArrayList<Task> taskCollection, ArrayList<List> listCollection) {
+        Scanner fileReader = new Scanner(myFile);
 
-    public static void openTask(Task T) {
-        System.out.println("Task Name: " + T.getTaskName());
-        System.out.println("Task Description: " + T.getTaskDescription());
-        System.out.println("Task Created On: " + T.getTaskCreated());
-        System.out.println("Task Deadline: " + T.getTaskDeadline());
-    } // Prints out details of a task.
+        while (fileReader.hasNextLine()) {
+            String[] external_data = fileReader.nextLine().split("~~");
+            if (external_data[0].equals("T")) {
+                String taskName = external_data[1];
+                String taskDescription = external_data[2];
+                LocalDateTime taskCreated = LocalDateTime.parse(external_data[3]);
+                LocalDateTime taskDeadline = LocalDateTime.parse(external_data[3]);
 
-    public static List createList(String listName, String listDescription, ArrayList<Task> listOfTasks) {
-        LocalDateTime listCreated = LocalDateTime.now();
-        return new List(listName, listDescription, listCreated, listOfTasks);
-    } // Creates a new task using an explicit constructor.
+                String s1 = external_data[4];
+                Node n1 = new Node(s1, null);
+                LinkedList commentThread = new LinkedList(n1);
+                Node curr = n1;
 
-    public static int searchList(String listName, ArrayList<List> listCollection) {
-        int size = listCollection.size();
-
-        for (int i = 0; i < size; i++) {
-            if (listName.equals(listCollection.get(i).getListName()))
-            { return i; }
-        }
-
-        return -1;
-    } // Used to search for the list the user desires.
-
-    public static List editList(List L) {
-        System.out.println("    What would you like to edit?");
-        System.out.println("        (1) Edit list name.");
-        System.out.println("        (2) Edit list description.");
-        System.out.println("        (3) Remove task from list.");
-        System.out.print("    Enter a number (1 - 3): ");
-
-        Scanner scnr = new Scanner(System.in);
-        int action = 0;
-
-        do {
-            try {
-                action = scnr.nextInt();
-                if (action < 1 || action > 3) {
-                    System.out.print("Invalid. Try again: ");
-                    scnr.nextLine();
-                }
-            } catch (InputMismatchException e) {
-                System.out.print("Invalid. Try again: ");
-                scnr.nextLine();
-            }
-        } while (action < 1 || action > 3);
-
-        scnr.nextLine();
-
-        switch (action) {
-            case 1: {
-                System.out.print("    Enter the new list name: ");
-                String listName = scnr.nextLine();
-                L.setListName(listName);
-                break;
-            }
-            case 2: {
-                System.out.print("    Enter the new list description: ");
-                String listDescription = scnr.nextLine();
-                L.setListDescription(listDescription);
-                break;
-            }
-            case 3: {
-                System.out.print("    Enter the name of the task you'd like to remove: ");
-                String taskName = scnr.nextLine();
-
-                int size = L.getListOfTasks().size();
-                int index = -1;
-
-                for (int i = 0; i < size; i++) {
-                    if (taskName.equals(L.getListOfTasks().get(i).getTaskName())) {
-                        index = i;
-                        break;
+                int length = external_data.length;
+                if (length >= 6) {
+                    for (int i = 5; i < length; i++) {
+                        String s2 = external_data[i];
+                        Node n2 = new Node(s2, null);
+                        curr.next = n2;
+                        curr = n2;
                     }
                 }
 
-                if (index == -1)
-                { System.out.println("    Task does not exist."); }
-                else
-                { L.getListOfTasks().remove(index); }
-                break;
+                Task T = new Task(taskName, taskDescription, taskCreated, taskDeadline, commentThread);
+                taskCollection.add(T);
+            } else if (external_data[0].equals("L")) {
+                String listName = external_data[1];
+                String listDescription = external_data[2];
+                LocalDateTime listCreated = LocalDateTime.parse(external_data[3]);
+                ArrayList<Task> listOfTasks = new ArrayList<>();
+
+                while (fileReader.hasNextLine()) {
+                    String[] internal_data = fileReader.nextLine().split("~~");
+                    if (internal_data[0].equals("L")) {
+                        break;
+                    }
+                    String taskName = external_data[1];
+                    String taskDescription = external_data[2];
+                    LocalDateTime taskCreated = LocalDateTime.parse(external_data[3]);
+                    LocalDateTime taskDeadline = LocalDateTime.parse(external_data[3]);
+
+                    String s1 = external_data[4];
+                    Node n1 = new Node(s1, null);
+                    LinkedList commentThread = new LinkedList(n1);
+                    Node curr = n1;
+
+                    int length = external_data.length;
+                    if (length >= 6) {
+                        for (int i = 5; i < length; i++) {
+                            String s2 = external_data[i];
+                            Node n2 = new Node(s2, null);
+                            curr.next = n2;
+                            curr = n2;
+                        }
+                    }
+
+                    Task T = new Task(taskName, taskDescription, taskCreated, taskDeadline, commentThread);
+                    taskCollection.add(T);
+                    listOfTasks.add(T);
+                }
+
+                List L = new List(listName, listDescription, listCreated, listOfTasks);
+                listCollection.add(L);
+            }
+        }
+        fileReader.close();
+    }
+
+    public static void writeFile(PrintWriter fileWriter, ArrayList<Task> taskCollection, ArrayList<List> listCollection) {
+        for (Task T : taskCollection) {
+            String taskName = T.getTaskName();
+            String taskDescription = T.getTaskDescription();
+            String taskCreated = T.getTaskCreated().toString();
+            String taskDeadline = T.getTaskCreated().toString();
+            fileWriter.write("T~~" + taskName + "~~" + taskDescription + "~~" + taskCreated + "~~" + taskDeadline + "~~");
+
+            Node curr = T.getCommentThread().head;
+            while (curr != null) {
+                String comment = curr.comment;
+                fileWriter.write("~~" + comment);
+                curr = curr.next;
+            }
+
+            fileWriter.write("\n");
+        }
+
+        for (List L : listCollection) {
+            String listName = L.getListName();
+            String listDescription = L.getListDescription();
+            String listCreated = L.getListCreated().toString();
+            fileWriter.write("L~~" + listName + "~~" + listDescription + "~~" + listCreated + "\n");
+
+            for (Task T : L.getListOfTasks()) {
+                String taskName = T.getTaskName();
+                String taskDescription = T.getTaskDescription();
+                String taskCreated = T.getTaskCreated().toString();
+                String taskDeadline = T.getTaskCreated().toString();
+                fileWriter.write("T~~" + taskName + "~~" + taskDescription + "~~" + taskCreated + "~~" + taskDeadline + "~~");
+
+                Node curr = T.getCommentThread().head;
+                while (curr != null) {
+                    String comment = curr.comment;
+                    fileWriter.write("~~" + comment);
+                    curr = curr.next;
+                }
+
+                fileWriter.write("\n");
             }
         }
 
-        System.out.print("    List edited. Continue editing? (Y/N): ");
-        if (continueOrNot(scnr) == 'Y' || continueOrNot(scnr) == 'y')
-        { return editList(L); } // Recursive call if the user wants to keep editing.
-        else
-        { return L; }
-    } // Used to make edits to a list.
-
-    public static void openList(List L) {
-        System.out.println("List Name: " + L.getListName());
-        System.out.println("List Description: " + L.getListName());
-        System.out.println("List Created On: " + L.getListCreated());
-        System.out.println("Tasks: -------------------------------------------------------------------------------------");
-
-        for (Task T : L.getListOfTasks()) {
-            openTask(T);
-            System.out.println("-");
-        }
-
-        System.out.println("--------------------------------------------------------------------------------------------");
-    } // Prints out the details of a task.
-
-    public static void readFile(FileInputStream readMe) {
-        Scanner fileReader = new Scanner(readMe);
-
-        while (fileReader.hasNextLine()) {
-            String data = fileReader.nextLine();
-            System.out.println(data);
-        } // Reads the file line-by-line.
-
-        fileReader.close();
-    } // Used to read a file.
-
-    public static void writeFile(PrintWriter fileWriter, FileOutputStream writeMe, Scanner scnr) {
-        System.out.print("    Add the text you would like to write to " + writeMe + ": ");
-        scnr.nextLine();
-        String text = scnr.nextLine();
-        fileWriter.println(text); // Writes to the file provided.
-
-        System.out.print("    File written to. Continue writing? (Y/N): ");
-        if (continueOrNot(scnr) == 'Y' || continueOrNot(scnr) == 'y')
-        { writeFile(fileWriter, writeMe, scnr); } // Recursive call if the user wants to keep writing.
-        else {
-            fileWriter.flush();
-            fileWriter.close();
-        }
-    } // Used to write to a file.
+        fileWriter.flush();
+        fileWriter.close();
+    }
 
     public static int sortOptions() {
         System.out.println("What would you like to sort?");
@@ -644,7 +584,7 @@ public class Main {
         } while (option < 1 || option > 3); // Will continue until valid input is given.
 
         return option;
-    } // Tells the program what the user wants to sort.
+    }
 
     public static int sortBy(int sortItem) {
         System.out.println("    What would you like to sort by?");
@@ -691,7 +631,7 @@ public class Main {
 
             return option;
         }
-    } // Tells the program what the user wants to sort by.
+    }
 
     public static int sortOrder() {
         System.out.println("    In what order?");
@@ -716,7 +656,34 @@ public class Main {
         } while (option < 1 || option > 2); // Will continue until valid input is given.
 
         return option;
-    } // Tells the program what order the user wants to sort by.
+    }
+
+    public static int commentOptions() {
+        System.out.println("What would you like to do?");
+        System.out.println("        (1) Add new comment.");
+        System.out.println("        (2) Edit existing comment.");
+        System.out.println("        (3) Remove most recent comment.");
+        System.out.println("        (4) Read all comments.");
+        System.out.print("    Enter a number (1 - 4): ");
+
+        Scanner scnr = new Scanner(System.in);
+        int option = 0;
+
+        do {
+            try {
+                option = scnr.nextInt();
+                if (option < 1 || option > 4) {
+                    System.out.print("Invalid. Try again: ");
+                    scnr.nextLine();
+                }
+            } catch (InputMismatchException e) {
+                System.out.print("Invalid. Try again: ");
+                scnr.nextLine();
+            }
+        } while (option < 1 || option > 4); // Will continue until valid input is given.
+
+        return option;
+    }
 
     public static char continueOrNot(Scanner scnr) {
         String continueOrNot = scnr.nextLine();
@@ -727,5 +694,5 @@ public class Main {
             return continueOrNot(scnr);
         } else
         { return more; }
-    } // Method to check if the user wants to continue a certain action.
+    }
 }
