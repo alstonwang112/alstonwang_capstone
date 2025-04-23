@@ -9,20 +9,14 @@ public class List {
     private String listDescription; // What the description of the list is.
     private LocalDateTime listCreated; // Time and date the list was created.
     private ArrayList<Task> listOfTasks; // Tasks contained within the list.
+    private String listCompletion; // Checks if the list is complete (C) or pending (P).
 
-    public List(String listName, String listDescription, LocalDateTime listCreated, ArrayList<Task> listOfTasks) {
+    public List(String listName, String listDescription, LocalDateTime listCreated, ArrayList<Task> listOfTasks, String listCompletion) {
         this.listName = listName;
         this.listDescription = listDescription;
         this.listCreated = listCreated;
         this.listOfTasks = listOfTasks;
-    }
-
-    List(List L) {
-        System.out.println("Copy constructor called");
-        listName = L.listName;
-        listDescription = L.listDescription;
-        listCreated = L.listCreated;
-        listOfTasks = L.listOfTasks;
+        this.listCompletion = listCompletion;
     }
 
     public void setListName(String listName) {
@@ -33,8 +27,8 @@ public class List {
         this.listDescription = listDescription;
     }
 
-    public void setListOfTasks(ArrayList<Task> L) {
-        this.listOfTasks = L;
+    public void setListCompletion(String listCompletion) {
+        this.listCompletion = listCompletion;
     }
 
     public String getListName() {
@@ -53,9 +47,13 @@ public class List {
         return this.listOfTasks; // Returns when the list of tasks.
     }
 
+    public String getListCompletion() {
+        return this.listCompletion;
+    }
+
     public static List createList(String listName, String listDescription, ArrayList<Task> listOfTasks) {
         LocalDateTime listCreated = LocalDateTime.now();
-        return new List(listName, listDescription, listCreated, listOfTasks);
+        return new List(listName, listDescription, listCreated, listOfTasks, "P");
     } // Creates a new task using an explicit constructor.
 
     public static int searchList(String listName, ArrayList<List> listCollection) {
@@ -69,12 +67,14 @@ public class List {
         return -1;
     } // Used to search for the list the user desires.
 
-    public static List editList(List L) {
+    public static List editList(ArrayList<List> listCollection, List L) {
         System.out.println("    What would you like to edit?");
         System.out.println("        (1) Edit list name.");
         System.out.println("        (2) Edit list description.");
-        System.out.println("        (3) Remove task from list.");
-        System.out.print("    Enter a number (1 - 3): ");
+        System.out.println("        (3) Add task to list.");
+        System.out.println("        (4) Remove task from list.");
+        System.out.println("        (5) Delete list.");
+        System.out.print("    Enter a number (1 - 5): ");
 
         Scanner scnr = new Scanner(System.in);
         int action = 0;
@@ -82,7 +82,7 @@ public class List {
         do {
             try {
                 action = scnr.nextInt();
-                if (action < 1 || action > 3) {
+                if (action < 1 || action > 5) {
                     System.out.print("Invalid. Try again: ");
                     scnr.nextLine();
                 }
@@ -90,7 +90,7 @@ public class List {
                 System.out.print("Invalid. Try again: ");
                 scnr.nextLine();
             }
-        } while (action < 1 || action > 3);
+        } while (action < 1 || action > 5);
 
         scnr.nextLine();
 
@@ -108,6 +108,32 @@ public class List {
                 break;
             }
             case 3: {
+                System.out.print("    Enter the name of the task you'd like to add: ");
+                System.out.print("    Enter the name of task you would like to create: ");
+                String taskName = scnr.nextLine();
+
+                System.out.print("    Enter a brief description of your task: ");
+                String taskDescription = scnr.nextLine();
+
+                System.out.print("    Enter a numeric deadline for your task (year, month, day, hour, minute): ");
+                String str = scnr.nextLine();
+
+                LocalDateTime taskDeadline;
+
+                do {
+                    taskDeadline = Main.checkLocalDateValidity(str.replaceAll("\\s", ""));
+                    if (taskDeadline == null)
+                    { str = scnr.nextLine(); }
+                } while (taskDeadline == null);
+
+                Queue commentThread = new Queue(new Node("", null));
+
+                Task T = Task.createTask(taskName, taskDescription, taskDeadline, commentThread);
+
+                L.getListOfTasks().add(T);
+                break;
+            }
+            case 4: {
                 System.out.print("    Enter the name of the task you'd like to remove: ");
                 String taskName = scnr.nextLine();
 
@@ -127,11 +153,17 @@ public class List {
                 { L.getListOfTasks().remove(index); }
                 break;
             }
+            case 5: {
+                listCollection.remove(L);
+                break;
+            }
         }
 
         System.out.print("    List edited. Continue editing? (Y/N): ");
-        if (Main.continueOrNot(scnr) == 'Y' || Main.continueOrNot(scnr) == 'y')
-        { return editList(L); } // Recursive call if the user wants to keep editing.
+        char continueOrNot = Main.continueOrNot(scnr);
+
+        if (continueOrNot == 'Y' || continueOrNot == 'y')
+        { return editList(listCollection, L); } // Recursive call if the user wants to keep editing.
         else
         { return L; }
     } // Used to make edits to a list.
@@ -150,4 +182,12 @@ public class List {
 
         System.out.println("--------------------------------------------------------------------------------------------");
     } // Prints out the details of a task.
+
+    public static void checkTasksWithinList(List L) {
+        for (Task T : L.getListOfTasks()) {
+            if (T.getTaskCompletion().equals("P")) { return; }
+        }
+
+        L.setListCompletion("C");
+    }
 }

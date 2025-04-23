@@ -22,18 +22,12 @@ public class Main {
         try {
             myFile = new FileInputStream("capstone.txt");
             readFile(myFile, taskCollection, listCollection); // If "capstone.txt" exists, it will read it.
-        } catch (FileNotFoundException e1) {
-            try {
-                createFile = new FileOutputStream("capstone.txt");
-                fileWriter = new PrintWriter(createFile);
-            } // If "capstone.txt" doesn't exist, it will create it.
-            catch (FileNotFoundException e2) { System.out.println("Error."); } // Thus, this exception will never be reached.
-        }
+        } catch (FileNotFoundException e1) { System.out.println("Error."); }
 
         do {
             System.out.println("What would you like to do?");
             printOptions();
-            System.out.print("Enter a number (1 - 8): ");
+            System.out.print("Enter a number (1 - 10): ");
 
             Scanner scnr = new Scanner(System.in);
             int option = 0;
@@ -41,7 +35,7 @@ public class Main {
             do {
                 try {
                     option = scnr.nextInt();
-                    if (option < 1 || option > 8) {
+                    if (option < 1 || option > 10) {
                         System.out.print("Invalid. Try again: ");
                         scnr.nextLine();
                     }
@@ -49,20 +43,21 @@ public class Main {
                     System.out.print("Invalid. Try again: ");
                     scnr.nextLine();
                 }
-            } while (option < 1 || option > 8); // Will continue until valid input is given.
+            } while (option < 1 || option > 10); // Will continue until valid input is given.
 
             scnr.nextLine();
 
             switch (option) {
                 case 1: {
                     System.out.print("(1) Would you like to create (C) a new task or duplicate (D) an existing one? ");
-                    String response;
-                    char choice;
+                    String response = scnr.nextLine();
+                    char choice = response.charAt(0);;
 
-                    do {
+                    while ((choice != 'C' && choice != 'c' && choice != 'D' && choice != 'd') || response.length() != 1) {
+                        System.out.print("    Invalid. Try again: ");
                         response = scnr.nextLine();
                         choice = response.charAt(0);
-                    } while((choice != 'C' && choice != 'c' && choice != 'D' && choice != 'd') || response.length() != 1);
+                    }
 
                     if (Character.toLowerCase(choice) == 'c') {
                         System.out.print("    Enter the name of task you would like to create: ");
@@ -77,12 +72,12 @@ public class Main {
                         LocalDateTime taskDeadline;
 
                         do {
-                            taskDeadline = checkLocalDateValidity(str);
+                            taskDeadline = checkLocalDateValidity(str.replaceAll("\\s", ""));
                             if (taskDeadline == null)
                             { str = scnr.nextLine(); }
                         } while (taskDeadline == null);
 
-                        LinkedList commentThread = new LinkedList(new Node("", null));
+                        Queue commentThread = new Queue(new Node("", null));
                         taskCollection.add(Task.createTask(taskName, taskDescription, taskDeadline, commentThread));
                         System.out.print("    Task created. ");
                     } else {
@@ -97,8 +92,8 @@ public class Main {
                             String taskDescription = taskCollection.get(taskNum).getTaskDescription();
                             LocalDateTime taskDeadline = taskCollection.get(taskNum).getTaskDeadline();
                             LocalDateTime taskCreated = taskCollection.get(taskNum).getTaskCreated();
-                            LinkedList commentThread = new LinkedList(new Node("", null));
-                            taskCollection.add(new Task(taskName, taskDescription, taskCreated, taskDeadline, commentThread));
+                            Queue commentThread = new Queue(new Node("", null));
+                            taskCollection.add(new Task(taskName, taskDescription, taskCreated, taskDeadline, commentThread, "P"));
                             System.out.print("    Task duplicated. ");
                         }
                     }
@@ -113,7 +108,7 @@ public class Main {
                     if (taskNum == -1)
                     { System.out.print("    Task does not exist. "); }
                     else {
-                        taskCollection.set(taskNum, Task.editTask(taskCollection.get(taskNum)));
+                        taskCollection.set(taskNum, Task.editTask(taskCollection, taskCollection.get(taskNum)));
                         System.out.print("    Task edited. ");
                     }
 
@@ -170,12 +165,12 @@ public class Main {
                             LocalDateTime taskDeadline;
 
                             do {
-                                taskDeadline = checkLocalDateValidity(str);
+                                taskDeadline = checkLocalDateValidity(str.replaceAll("\\s", ""));
                                 if (taskDeadline == null)
                                 { str = scnr.nextLine(); }
                             } while (taskDeadline == null);
 
-                            LinkedList commentThread = new LinkedList(new Node("", null));
+                            Queue commentThread = new Queue(new Node("", null));
                             T = Task.createTask(taskName, taskDescription, taskDeadline, commentThread);
                             taskCollection.add(T);
                         }
@@ -195,7 +190,7 @@ public class Main {
                             String listDescription = listCollection.get(listNum).getListDescription();
                             LocalDateTime listCreated = listCollection.get(listNum).getListCreated();
                             ArrayList<Task> listOfTasks = listCollection.get(listNum).getListOfTasks();
-                            listCollection.add(new List(listName, listDescription, listCreated, listOfTasks));
+                            listCollection.add(new List(listName, listDescription, listCreated, listOfTasks, "P"));
                             System.out.print("    List duplicated. ");
                         }
                     }
@@ -210,7 +205,7 @@ public class Main {
                     if (listNum == -1)
                     { System.out.print("    List does not exist. "); }
                     else {
-                        listCollection.set(listNum, List.editList(listCollection.get(listNum)));
+                        listCollection.set(listNum, List.editList(listCollection, listCollection.get(listNum)));
                         System.out.print("    List edited. ");
                     }
 
@@ -269,18 +264,19 @@ public class Main {
                     break;
                 }
                 case 8: {
-                    System.out.print("(8): ");
-                    int comments = commentOptions();
+                    System.out.print("(8) ");
+                    int commentOption = commentOptions();
                     boolean exists = false;
                     String taskName;
                     Task T = null;
 
+                    System.out.print("    Enter the name of the task you want to act on: ");
+
                     do {
-                        System.out.print("    Enter the name of the task you want to open the comments thread of: ");
                         taskName = scnr.nextLine();
                         taskNum = Task.searchTask(taskName, taskCollection);
                         if (taskNum == -1) {
-                            System.out.print("    Task does not exist. ");
+                            System.out.print("    Task does not exist. Try again: ");
                         } else {
                             T = taskCollection.get(taskNum);
                             exists = true;
@@ -288,15 +284,16 @@ public class Main {
                     } while(!exists);
 
                     String comment;
+                    Queue Q = T.getCommentThread();
 
-                    switch (comments) {
+                    switch (commentOption) {
                         case 1: {
                             System.out.print("    Write your comment: ");
                             comment = scnr.nextLine();
-                            if (T.getCommentThread().isEmpty()) {
-                                T.getCommentThread().head = new Node(comment, null);
+                            if (Q.isEmpty()) {
+                                Q.head = new Node(comment, null);
                             } else {
-                                Queue.add(comment);
+                                Q.add(comment);
                             }
                             break;
                         }
@@ -304,7 +301,7 @@ public class Main {
                             System.out.print("    Write the comment you'd like to edit: ");
                             comment = scnr.nextLine();
 
-                            Node curr = T.getCommentThread().head;
+                            Node curr = Q.head;
                             while (curr != null) {
                                 if (curr.comment.equals(comment)) {
                                     break;
@@ -316,10 +313,10 @@ public class Main {
                             if (curr == null) {
                                 System.out.println("    This comment doesn't exist. Add a new comment instead: ");
                                 comment = scnr.nextLine();
-                                if (T.getCommentThread().isEmpty()) {
-                                    T.getCommentThread().head = new Node(comment, null);
+                                if (Q.isEmpty()) {
+                                    Q.head = new Node(comment, null);
                                 } else {
-                                    Queue.add(comment);
+                                    Q.add(comment);
                                 }
                                 break;
                             } else {
@@ -329,77 +326,34 @@ public class Main {
                             }
                         }
                         case 3: {
-                            String deleted = Queue.remove();
+                            String deleted = Q.remove();
+                            System.out.println("\"" + deleted + "\" successfully deleted.");
                             break;
                         }
                         case 4: {
+                            System.out.print("--- Reading Comments: ---------------------------------------------------------------------------------");
 
+                            if (Q.isEmpty()) {
+                                System.out.print("    No comments available. ");
+                            } else {
+                                while (!Q.isEmpty()) {
+                                    System.out.println(Q.remove());
+                                }
+                            }
+                            System.out.println("-------------------------------------------------------------------------------------------------------");
                             break;
                         }
                     }
-
-                    if (Character.toLowerCase(choice) == 'a') {
-                        System.out.print("    Enter the name of the task you would like to add a comment to: ");
-                        String taskName = scnr.nextLine();
-
-                        taskNum = Task.searchTask(taskName, taskCollection);
-
-                        if (taskNum != -1)
-                        { System.out.print("    Task does not exist. "); }
-                        else {
-                            do {
-                                Task T = taskCollection.get(taskNum);
-                                System.out.print("    Write your comment here: ");
-                                String comment = scnr.nextLine();
-                                Node head = T.getCommentThread().head;
-
-                                if (head == null) {
-                                    T.setHead(comment);
-                                } else {
-                                    Node n = new Node(comment, null);
-                                    Node curr = head;
-                                    Node prev = null;
-
-                                    while (curr != null) {
-                                        if (curr.next == null) {
-                                            prev = curr;
-                                        }
-                                        curr = curr.next;
-                                    }
-
-                                    prev.next = n;
-                                }
-                                System.out.print("    Comment added. Add more (Y/N)?");
-                                response = scnr.nextLine();
-                                choice = response.charAt(0);
-                            } while((choice != 'Y' && choice != 'y' && choice != 'N' && choice != 'n') || response.length() != 1);
-                        }
-                    } else {
-                        System.out.print("    Enter the name of the task you would like to read the comments of: ");
-                        String taskName = scnr.nextLine();
-
-                        taskNum = Task.searchTask(taskName, taskCollection);
-
-                        if (taskNum != -1)
-                        { System.out.print("    Task does not exist. "); }
-                        else {
-                            Task T = taskCollection.get(taskNum);
-                            System.out.println("    Reading Comments: ---------------------------------------------------------------------------------");
-                            Node head = T.getCommentThread().head;
-
-                            if (head == null) {
-                                System.out.print("    No comments available. ");
-                            } else {
-                                Node curr = head;
-
-                                while (curr != null) {
-                                    System.out.println(curr.comment);
-                                    curr = curr.next;
-                                }
-                            }
-                        }
-                        System.out.println("-------------------------------------------------------------------------------------------------------");
-                    }
+                    break;
+                }
+                case 9: {
+                    System.out.print("(9) ");
+                    Generic.check(taskCollection);
+                    break;
+                }
+                case 10: {
+                    System.out.print("(10) ");
+                    Generic.check(listCollection);
                     break;
                 }
             }
@@ -407,6 +361,12 @@ public class Main {
             System.out.println("Continue with another action? (Y/N): ");
             continueOrNot = continueOrNot(scnr);
         } while (continueOrNot == 'Y' || continueOrNot == 'y');
+
+        try {
+            createFile = new FileOutputStream("capstone.txt");
+            fileWriter = new PrintWriter(createFile);
+        } // If "capstone.txt" doesn't exist, it will create it.
+        catch (FileNotFoundException e2) { System.out.println("Error."); }
 
         writeFile(fileWriter, taskCollection, listCollection);
 
@@ -422,7 +382,9 @@ public class Main {
         System.out.println("    (5) Edit list.");
         System.out.println("    (6) Open list.");
         System.out.println("    (7) Sort.");
-        System.out.println("    (8) Add/read comment(s).");
+        System.out.println("    (8) Add, edit, remove, or read comment(s).");
+        System.out.println("    (9) Check pending tasks.");
+        System.out.println("    (10) Check pending lists.");
     }
 
     public static LocalDateTime checkLocalDateValidity(String str) {
@@ -452,29 +414,28 @@ public class Main {
                 String taskName = external_data[1];
                 String taskDescription = external_data[2];
                 LocalDateTime taskCreated = LocalDateTime.parse(external_data[3]);
-                LocalDateTime taskDeadline = LocalDateTime.parse(external_data[3]);
+                LocalDateTime taskDeadline = LocalDateTime.parse(external_data[4]);
+                String taskCompletion = external_data[5];
 
-                String s1 = external_data[4];
+                String s1 = external_data[6];
                 Node n1 = new Node(s1, null);
-                LinkedList commentThread = new LinkedList(n1);
-                Node curr = n1;
+                Queue commentThread = new Queue(n1);
 
                 int length = external_data.length;
-                if (length >= 6) {
-                    for (int i = 5; i < length; i++) {
+                if (length >= 8) {
+                    for (int i = 7; i < length; i++) {
                         String s2 = external_data[i];
-                        Node n2 = new Node(s2, null);
-                        curr.next = n2;
-                        curr = n2;
+                        commentThread.add(s2);
                     }
                 }
 
-                Task T = new Task(taskName, taskDescription, taskCreated, taskDeadline, commentThread);
+                Task T = new Task(taskName, taskDescription, taskCreated, taskDeadline, commentThread, taskCompletion);
                 taskCollection.add(T);
             } else if (external_data[0].equals("L")) {
                 String listName = external_data[1];
                 String listDescription = external_data[2];
                 LocalDateTime listCreated = LocalDateTime.parse(external_data[3]);
+                String listCompletion = external_data[4];
                 ArrayList<Task> listOfTasks = new ArrayList<>();
 
                 while (fileReader.hasNextLine()) {
@@ -485,29 +446,27 @@ public class Main {
                     String taskName = external_data[1];
                     String taskDescription = external_data[2];
                     LocalDateTime taskCreated = LocalDateTime.parse(external_data[3]);
-                    LocalDateTime taskDeadline = LocalDateTime.parse(external_data[3]);
+                    LocalDateTime taskDeadline = LocalDateTime.parse(external_data[4]);
+                    String taskCompletion = external_data[5];
 
-                    String s1 = external_data[4];
+                    String s1 = external_data[6];
                     Node n1 = new Node(s1, null);
-                    LinkedList commentThread = new LinkedList(n1);
-                    Node curr = n1;
+                    Queue commentThread = new Queue(n1);
 
                     int length = external_data.length;
-                    if (length >= 6) {
-                        for (int i = 5; i < length; i++) {
+                    if (length >= 8) {
+                        for (int i = 7; i < length; i++) {
                             String s2 = external_data[i];
-                            Node n2 = new Node(s2, null);
-                            curr.next = n2;
-                            curr = n2;
+                            commentThread.add(s2);
                         }
                     }
 
-                    Task T = new Task(taskName, taskDescription, taskCreated, taskDeadline, commentThread);
+                    Task T = new Task(taskName, taskDescription, taskCreated, taskDeadline, commentThread, taskCompletion);
                     taskCollection.add(T);
                     listOfTasks.add(T);
                 }
 
-                List L = new List(listName, listDescription, listCreated, listOfTasks);
+                List L = new List(listName, listDescription, listCreated, listOfTasks, listCompletion);
                 listCollection.add(L);
             }
         }
@@ -520,13 +479,13 @@ public class Main {
             String taskDescription = T.getTaskDescription();
             String taskCreated = T.getTaskCreated().toString();
             String taskDeadline = T.getTaskCreated().toString();
-            fileWriter.write("T~~" + taskName + "~~" + taskDescription + "~~" + taskCreated + "~~" + taskDeadline + "~~");
+            String taskCompletion = T.getTaskCompletion();
+            fileWriter.write("T~~" + taskName + "~~" + taskDescription + "~~" + taskCreated + "~~" + taskDeadline + "~~" + taskCompletion + "~~");
 
-            Node curr = T.getCommentThread().head;
-            while (curr != null) {
-                String comment = curr.comment;
+            Queue Q = T.getCommentThread();
+            while (!Q.isEmpty()) {
+                String comment = Q.remove();
                 fileWriter.write("~~" + comment);
-                curr = curr.next;
             }
 
             fileWriter.write("\n");
@@ -536,20 +495,21 @@ public class Main {
             String listName = L.getListName();
             String listDescription = L.getListDescription();
             String listCreated = L.getListCreated().toString();
-            fileWriter.write("L~~" + listName + "~~" + listDescription + "~~" + listCreated + "\n");
+            String listCompletion = L.getListCompletion();
+            fileWriter.write("L~~" + listName + "~~" + listDescription + "~~" + listCreated + "~~" + listCompletion + "\n");
 
             for (Task T : L.getListOfTasks()) {
                 String taskName = T.getTaskName();
                 String taskDescription = T.getTaskDescription();
                 String taskCreated = T.getTaskCreated().toString();
                 String taskDeadline = T.getTaskCreated().toString();
-                fileWriter.write("T~~" + taskName + "~~" + taskDescription + "~~" + taskCreated + "~~" + taskDeadline + "~~");
+                String taskCompletion = T.getTaskCompletion();
+                fileWriter.write("T~~" + taskName + "~~" + taskDescription + "~~" + taskCreated + "~~" + taskDeadline + "~~" + taskCompletion + "~~");
 
-                Node curr = T.getCommentThread().head;
-                while (curr != null) {
-                    String comment = curr.comment;
+                Queue Q = T.getCommentThread();
+                while (!Q.isEmpty()) {
+                    String comment = Q.remove();
                     fileWriter.write("~~" + comment);
-                    curr = curr.next;
                 }
 
                 fileWriter.write("\n");
@@ -662,7 +622,7 @@ public class Main {
         System.out.println("What would you like to do?");
         System.out.println("        (1) Add new comment.");
         System.out.println("        (2) Edit existing comment.");
-        System.out.println("        (3) Remove most recent comment.");
+        System.out.println("        (3) Remove earliest comment.");
         System.out.println("        (4) Read all comments.");
         System.out.print("    Enter a number (1 - 4): ");
 
