@@ -21,11 +21,17 @@ public class Generic {
         Generic G = arr.getFirst();
 
         if (G instanceof Task) {
-            System.out.println(" " + pending + " tasks pending.");
-            System.out.println("    " + completed + " tasks completed.");
+            if (pending == 1) { System.out.println("    " + pending + " task pending."); }
+            else { System.out.println("    " + pending + " tasks pending."); }
+
+            if (completed == 1) { System.out.println("    " + completed + " task completed."); }
+            else { System.out.println("    " + completed + " tasks completed."); }
         } else {
-            System.out.println(pending + " lists pending.");
-            System.out.println("    " + completed + " lists completed.");
+            if (pending == 1) { System.out.println("    " + pending + " list pending."); }
+            else { System.out.println("    " + pending + " lists pending."); }
+
+            if (completed == 1) { System.out.println("    " + completed + " lost completed."); }
+            else { System.out.println("    " + completed + " lists completed."); }
         }
     }
 }

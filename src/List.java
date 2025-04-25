@@ -36,7 +36,7 @@ public class List {
     }
 
     public String getListDescription() {
-        return this.listDescription; // Returns the list description..
+        return this.listDescription; // Returns the list description.
     }
 
     public LocalDateTime getListCreated() {
@@ -50,6 +50,7 @@ public class List {
     public String getListCompletion() {
         return this.listCompletion;
     }
+
 
     public static List createList(String listName, String listDescription, ArrayList<Task> listOfTasks) {
         LocalDateTime listCreated = LocalDateTime.now();
@@ -67,7 +68,7 @@ public class List {
         return -1;
     } // Used to search for the list the user desires.
 
-    public static List editList(ArrayList<List> listCollection, List L) {
+    public static List editList(ArrayList<List> listCollection, List L, ArrayList<Task> taskCollection) {
         System.out.println("    What would you like to edit?");
         System.out.println("        (1) Edit list name.");
         System.out.println("        (2) Edit list description.");
@@ -83,11 +84,11 @@ public class List {
             try {
                 action = scnr.nextInt();
                 if (action < 1 || action > 5) {
-                    System.out.print("Invalid. Try again: ");
+                    System.out.print("    Invalid. Try again: ");
                     scnr.nextLine();
                 }
             } catch (InputMismatchException e) {
-                System.out.print("Invalid. Try again: ");
+                System.out.print("    Invalid. Try again: ");
                 scnr.nextLine();
             }
         } while (action < 1 || action > 5);
@@ -98,64 +99,90 @@ public class List {
             case 1: {
                 System.out.print("    Enter the new list name: ");
                 String listName = scnr.nextLine();
-                L.setListName(listName);
+                if (listName.equals("QUIT")) { System.exit(1); }
+                else { L.setListName(listName); }
                 break;
             }
             case 2: {
                 System.out.print("    Enter the new list description: ");
                 String listDescription = scnr.nextLine();
-                L.setListDescription(listDescription);
+                if (listDescription.equals("QUIT")) { System.exit(1); }
+                else { L.setListDescription(listDescription); }
                 break;
             }
             case 3: {
                 System.out.print("    Enter the name of the task you'd like to add: ");
-                System.out.print("    Enter the name of task you would like to create: ");
                 String taskName = scnr.nextLine();
+                if (taskName.equals("QUIT")) { System.exit(1); }
+                else {
+                    Task T;
+                    int taskNum = Task.searchTask(taskName, taskCollection);
 
-                System.out.print("    Enter a brief description of your task: ");
-                String taskDescription = scnr.nextLine();
+                    if (taskNum == -1) {
+                        System.out.print("    Task does not exist. A new task will be created. Enter a brief description of your task: ");
+                        String taskDescription = scnr.nextLine();
+                        if (taskDescription.equals("QUIT")) { System.exit(1); }
+                        else {
+                            System.out.print("    Enter a numeric deadline for your task (year, month, day, hour, minute): ");
+                            String str = scnr.nextLine();
+                            if (str.equals("QUIT")) { System.exit(1); }
+                            else {
+                                System.out.print("    Prioritize task? (Y/N): ");
+                                char prioritizeOrNot = Main.continueOrNot(scnr);
 
-                System.out.print("    Enter a numeric deadline for your task (year, month, day, hour, minute): ");
-                String str = scnr.nextLine();
+                                boolean prioritize;
 
-                LocalDateTime taskDeadline;
+                                prioritize = (prioritizeOrNot == 'Y') || (prioritizeOrNot == 'y');
 
-                do {
-                    taskDeadline = Main.checkLocalDateValidity(str.replaceAll("\\s", ""));
-                    if (taskDeadline == null)
-                    { str = scnr.nextLine(); }
-                } while (taskDeadline == null);
+                                LocalDateTime taskDeadline;
 
-                Queue commentThread = new Queue(new Node("", null));
+                                do {
+                                    taskDeadline = Main.checkLocalDateValidity(str.replaceAll("\\s", ""));
+                                    if (taskDeadline == null) {
+                                        str = scnr.nextLine();
+                                        if (str.equals("QUIT")) { System.exit(1); }
+                                    }
+                                } while (taskDeadline == null);
 
-                Task T = Task.createTask(taskName, taskDescription, taskDeadline, commentThread);
+                                Queue commentThread = new Queue(new Node("", null));
 
-                L.getListOfTasks().add(T);
+                                T = Task.createTask(taskName, taskDescription, taskDeadline, commentThread, prioritize);
+                                L.getListOfTasks().add(T);
+                            }
+                        }
+                    } else {
+                        T = taskCollection.get(taskNum);
+                        L.getListOfTasks().add(T);
+                    }
+                }
                 break;
             }
             case 4: {
                 System.out.print("    Enter the name of the task you'd like to remove: ");
                 String taskName = scnr.nextLine();
+                if (taskName.equals("QUIT")) { System.exit(1); }
+                else {
+                    int size = L.getListOfTasks().size();
+                    int index = -1;
 
-                int size = L.getListOfTasks().size();
-                int index = -1;
+                    for (int i = 0; i < size; i++) {
+                        if (taskName.equals(L.getListOfTasks().get(i).getTaskName())) {
+                            index = i;
+                            break;
+                        }
+                    }
 
-                for (int i = 0; i < size; i++) {
-                    if (taskName.equals(L.getListOfTasks().get(i).getTaskName())) {
-                        index = i;
-                        break;
+                    if (index == -1) {
+                        System.out.println("    Task does not exist.");
+                    } else {
+                        L.getListOfTasks().remove(index);
                     }
                 }
-
-                if (index == -1)
-                { System.out.println("    Task does not exist."); }
-                else
-                { L.getListOfTasks().remove(index); }
                 break;
             }
             case 5: {
                 listCollection.remove(L);
-                break;
+                return null;
             }
         }
 
@@ -163,22 +190,31 @@ public class List {
         char continueOrNot = Main.continueOrNot(scnr);
 
         if (continueOrNot == 'Y' || continueOrNot == 'y')
-        { return editList(listCollection, L); } // Recursive call if the user wants to keep editing.
+        { return editList(listCollection, L, taskCollection); } // Recursive call if the user wants to keep editing.
         else
         { return L; }
     } // Used to make edits to a list.
 
     public static void openList(List L) {
         System.out.println("List Name: " + L.getListName());
-        System.out.println("List Description: " + L.getListName());
+        System.out.println("List Description: " + L.getListDescription());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         System.out.println("List Created On: " + L.getListCreated().format(formatter));
         System.out.println("Tasks: -------------------------------------------------------------------------------------");
 
         for (Task T : L.getListOfTasks()) {
-            Task.openTask(T);
-            System.out.println("-");
-        }
+            if (T.getTaskPrioritization()) {
+                Task.openTask(T);
+                System.out.println("-");
+            }
+        } // Prints all the prioritized tasks first.
+
+        for (Task T : L.getListOfTasks()) {
+            if (!(T.getTaskPrioritization())) {
+                Task.openTask(T);
+                System.out.println("-");
+            }
+        } // Prints the remainder of the tasks without double printing.
 
         System.out.println("--------------------------------------------------------------------------------------------");
     } // Prints out the details of a task.
